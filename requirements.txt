@@ -1,0 +1,14 @@
+# Core Web Application Framework
+streamlit>=1.35.0,<2.0.0
+
+# Natural Language Processing & Corpus Access
+nltk>=3.8.1,<4.0.0
+
+# Tabular Data Manipulation & Export
+pandas>=2.1.0,<3.0.0
+
+# Interactive Visualizations
+plotly>=5.22.0,<6.0.0
+
+# Statistical Evaluation & Confusion Matrices
+scikit-learn>=1.4.0,<2.0.0
