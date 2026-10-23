@@ -7,7 +7,7 @@
   <style>
     :root {
       --bg-card: #0f172a;
-      --card-border: #1e293b;
+      --card-border: #334155;
       --text-main: #f8fafc;
       --text-muted: #94a3b8;
       --primary: #6366f1;
@@ -18,7 +18,7 @@
 
     body {
       margin: 0;
-      padding: 8px;
+      padding: 6px;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
       background: transparent;
       color: var(--text-main);
@@ -29,7 +29,7 @@
       border: 1px solid var(--card-border);
       border-radius: 12px;
       padding: 14px 16px;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
     }
 
     .mic-header {
@@ -41,7 +41,8 @@
 
     .mic-title {
       font-size: 14px;
-      font-weight: 600;
+      font-weight: 700;
+      color: #f8fafc;
       display: flex;
       align-items: center;
       gap: 8px;
@@ -51,35 +52,33 @@
       font-size: 11px;
       padding: 2px 8px;
       border-radius: 10px;
-      font-weight: 500;
-    }
-
-    .badge-info {
-      background: rgba(99, 102, 241, 0.15);
+      font-weight: 600;
+      background: rgba(99, 102, 241, 0.2);
       color: #a5b4fc;
-      border: 1px solid rgba(99, 102, 241, 0.3);
+      border: 1px solid rgba(99, 102, 241, 0.4);
     }
 
     .mic-controls {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
       margin-bottom: 8px;
     }
 
     .btn-mic {
       background: var(--primary);
-      color: white;
+      color: #ffffff;
       border: none;
       border-radius: 20px;
-      padding: 8px 16px;
+      padding: 8px 18px;
       font-size: 13px;
-      font-weight: 600;
+      font-weight: 700;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
       gap: 6px;
       transition: all 0.2s ease;
+      box-shadow: 0 2px 8px rgba(99, 102, 241, 0.4);
     }
 
     .btn-mic:hover {
@@ -93,33 +92,34 @@
     }
 
     @keyframes pulse {
-      0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.6); }
-      70% { box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); }
+      0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+      70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
       100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
     }
 
     .status-text {
       font-size: 12px;
-      color: var(--text-muted);
+      font-weight: 500;
+      color: #cbd5e1;
     }
 
     .transcript-box {
       background: #090d16;
-      border: 1px solid #1e293b;
+      border: 1px solid #334155;
       border-radius: 8px;
-      padding: 10px;
+      padding: 10px 12px;
       min-height: 44px;
-      max-height: 80px;
+      max-height: 75px;
       overflow-y: auto;
       font-size: 13px;
       line-height: 1.4;
-      color: #e2e8f0;
+      color: #f1f5f9;
       white-space: pre-wrap;
     }
 
     .not-supported {
-      background: rgba(239, 68, 68, 0.12);
-      border: 1px solid rgba(239, 68, 68, 0.3);
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.4);
       border-radius: 8px;
       padding: 12px 14px;
       font-size: 13px;
@@ -132,8 +132,8 @@
   <div class="mic-card">
     <div class="mic-header">
       <div class="mic-title">
-        <span>🎙️ Web Speech Microphone Input</span>
-        <span class="badge badge-info">Direct Auto-Tagging</span>
+        <span>🎙️ Live Speech Recognition</span>
+        <span class="badge">Web Speech API</span>
       </div>
     </div>
 
@@ -151,7 +151,7 @@
         <span id="statusIndicator" class="status-text">Click to speak conversational sentences.</span>
       </div>
 
-      <div class="transcript-box" id="transcriptDisplay">Speak into your mic — on stopping, it processes and tags automatically!</div>
+      <div class="transcript-box" id="transcriptDisplay">Click 'Start Speaking'. When you stop, speech directly enters the transcript area and auto-tags!</div>
     </div>
   </div>
 
@@ -179,11 +179,29 @@
       let isRecording = false;
       let finalTranscript = '';
 
-      function sendTranscriptToParent(text) {
+      function transferTranscriptToStreamlit(text) {
         const cleaned = (text || '').trim();
         if (!cleaned) return;
 
-        // Auto navigate parent with query params to trigger instant Streamlit processing
+        // Try direct DOM injection first for instant visual responsiveness
+        try {
+          const parentDoc = window.parent.document;
+          const textArea = parentDoc.querySelector('textarea');
+          if (textArea) {
+            const valueSetter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, 'value')?.set;
+            if (valueSetter) {
+              valueSetter.call(textArea, cleaned);
+            } else {
+              textArea.value = cleaned;
+            }
+            textArea.dispatchEvent(new Event('input', { bubbles: true }));
+            textArea.dispatchEvent(new Event('change', { bubbles: true }));
+          }
+        } catch (e) {
+          console.warn("Direct DOM sync:", e);
+        }
+
+        // Trigger URL query navigation so Streamlit Python server immediately reruns with the new text
         try {
           const parentUrl = new URL(window.parent.location.href);
           parentUrl.searchParams.set('spoken', cleaned);
@@ -212,7 +230,7 @@
         isRecording = true;
         toggleBtn.classList.add('recording');
         micBtnLabel.textContent = 'Stop Recording';
-        statusIndicator.textContent = 'Listening... Speak now.';
+        statusIndicator.textContent = 'Listening... Click Stop when finished.';
       };
 
       recognition.onend = function () {
@@ -222,9 +240,8 @@
 
         const transcript = finalTranscript.trim();
         if (transcript) {
-          statusIndicator.textContent = '⚡ Speech captured! Processing & Tagging...';
-          // Immediately send to Streamlit
-          sendTranscriptToParent(transcript);
+          statusIndicator.textContent = '⚡ Transcribed! Populating box & auto-tagging...';
+          transferTranscriptToStreamlit(transcript);
         } else {
           statusIndicator.textContent = 'No speech detected. Try speaking again.';
         }
