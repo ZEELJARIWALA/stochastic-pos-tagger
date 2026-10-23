@@ -396,7 +396,7 @@ elif navigation_choice == "🔍 Algorithm & Backoff Trace":
 | Model Tier | Conditioning Context | Mathematical Decision Rule | When Does It Win? |
 | :--- | :--- | :--- | :--- |
 | :blue-background[**Trigram**] | `(t_{i-2}, t_{i-1}, w_i)` | $\\arg\\max_t P(t \\mid t_{i-2}, t_{i-1}, w_i)$ | Matches full 3-gram syntactic structure (e.g. relative clause syntax). |
-| :purple-background[**Bigram**] | `(t_{i-1}, w_i)` | $\\arg\\max_t P(t \\mid t_{i-1}, w_i)$ | Trigram misses, but previous tag provides context to resolve word ambiguity. |
+| :violet-background[**Bigram**] | `(t_{i-1}, w_i)` | $\\arg\\max_t P(t \\mid t_{i-1}, w_i)$ | Trigram misses, but previous tag provides context to resolve word ambiguity. |
 | :green-background[**Unigram**] | `(w_i)` | $\\arg\\max_t P(t \\mid w_i)$ | Word was seen in corpus; picks its most frequent tag regardless of context. |
 | :orange-background[**Default**] | `None` | `"NN" (Noun)` | Word is Out-Of-Vocabulary (OOV) or spontaneous conversational filler. |
             """
@@ -432,14 +432,14 @@ elif navigation_choice == "🔍 Algorithm & Backoff Trace":
 
         with st.container(border=True):
             st.markdown("<mark>#### 3️⃣ Bigram Context Disambiguation Calculation</mark>", unsafe_allow_html=True)
-            st.markdown("<mark>**Example Token:** :purple-background[**right**] preceded by Comma tag :gray-background[**,**]</mark>", unsafe_allow_html=True)
+            st.markdown("<mark>**Example Token:** :violet-background[**right**] preceded by Comma tag :gray-background[**,**]</mark>", unsafe_allow_html=True)
             st.markdown("**Corpus Challenge:** `'right'` is ambiguous: appears 22 times as Noun (`NN`), 7 times as Adverb (`RB`), and 5 times as Adjective (`JJ`).")
             st.markdown("<mark>**Context Conditioning Formula:**</mark>", unsafe_allow_html=True)
             st.latex(r"P(Tag \mid t_{i-1}=\text{','}, w_i=\text{'right'}) = \frac{C(t_{i-1}=\text{','}, w_i=\text{'right'}, Tag)}{C(t_{i-1}=\text{','}, w_i=\text{'right'})}")
             st.markdown("**Bigram Context Resolution:**")
             st.markdown("- **In isolation (Unigram)**: `'right'` would guess `NN` (64.71%).")
-            st.markdown("- **With Bigram Context**: Preceded by `','`, the transition matches adverbial discourse ➔ :purple-background[**RB**] *(Adverb: 'like, right before lunch')*!")
-            st.success("✅ **Bigram Context Overrides Unigram**: Correctly assigns :purple-background[**RB**] based on the preceding comma!")
+            st.markdown("- **With Bigram Context**: Preceded by `','`, the transition matches adverbial discourse ➔ :violet-background[**RB**] *(Adverb: 'like, right before lunch')*!")
+            st.success("✅ **Bigram Context Overrides Unigram**: Correctly assigns :violet-background[**RB**] based on the preceding comma!")
 
     with c2:
         with st.container(border=True):
