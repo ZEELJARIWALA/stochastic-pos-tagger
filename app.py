@@ -102,10 +102,38 @@ MODELS_DIR = BASE_DIR / "models"
 VOICE_HTML_PATH = BASE_DIR / "components" / "voice_input.html"
 
 
+def _ensure_nltk_data():
+    """Download required NLTK corpora/tokenizers if not already present."""
+    import nltk
+    for resource, path in [
+        ("treebank", "corpora/treebank"),
+        ("punkt", "tokenizers/punkt"),
+        ("averaged_perceptron_tagger", "taggers/averaged_perceptron_tagger"),
+        ("punkt_tab", "tokenizers/punkt_tab"),
+    ]:
+        try:
+            nltk.data.find(path)
+        except LookupError:
+            nltk.download(resource, quiet=True)
+
+_ensure_nltk_data()
+
+
 @st.cache_resource
 def get_pipeline() -> TaggingPipeline:
-    """Load or initialize tagging pipeline once."""
-    return TaggingPipeline()
+    """Load or initialize tagging pipeline once.
+    
+    If no trained model artifact exists on disk, automatically trains
+    on the Penn Treebank corpus and saves it so the app is always ready.
+    """
+    pipe = TaggingPipeline()
+    if not pipe.is_model_loaded:
+        # Auto-train if no model pkl found (e.g. fresh deployment)
+        train_sents, _, _ = load_treebank_split(seed=42)
+        taggers = train_stochastic_taggers(train_sents)
+        save_trained_taggers(taggers)
+        pipe = TaggingPipeline(taggers)
+    return pipe
 
 
 @st.cache_data
