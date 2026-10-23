@@ -42,63 +42,6 @@ st.set_page_config(
 st.markdown(
     """
     <style>
-    /* Global high-contrast dark palette */
-    .metric-card {
-        background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%) !important;
-        border: 1px solid #334155 !important;
-        border-radius: 10px;
-        padding: 16px 20px;
-        margin-bottom: 18px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
-    }
-    .metric-card h4 {
-        color: #f8fafc !important;
-        margin-top: 0;
-        margin-bottom: 10px;
-        font-weight: 700;
-    }
-    .metric-card p, .metric-card li {
-        color: #cbd5e1 !important;
-        font-size: 14px;
-        line-height: 1.6;
-    }
-    
-    /* High contrast N-Gram table */
-    .ngram-table {
-        width: 100% !important;
-        border-collapse: collapse !important;
-        margin-top: 10px !important;
-        margin-bottom: 15px !important;
-        background-color: #0f172a !important;
-        border: 1px solid #334155 !important;
-        border-radius: 8px !important;
-        overflow: hidden !important;
-    }
-    .ngram-table th {
-        background-color: #1e293b !important;
-        color: #38bdf8 !important;
-        font-weight: 700 !important;
-        padding: 10px 14px !important;
-        border-bottom: 2px solid #475569 !important;
-        text-align: left !important;
-        font-size: 14px !important;
-    }
-    .ngram-table td {
-        background-color: #0f172a !important;
-        color: #f8fafc !important;
-        padding: 10px 14px !important;
-        border-bottom: 1px solid #1e293b !important;
-        font-size: 14px !important;
-    }
-    .ngram-table code {
-        background-color: #1e293b !important;
-        color: #a5f3fc !important;
-        padding: 3px 6px !important;
-        border-radius: 4px !important;
-        font-weight: 600 !important;
-        border: 1px solid #334155 !important;
-    }
-
     /* Status Badges */
     .status-badge {
         display: inline-block;
@@ -110,27 +53,30 @@ st.markdown(
     }
     .status-ready {
         background: rgba(16, 185, 129, 0.25);
-        color: #34d399;
+        color: #10b981;
         border: 1px solid rgba(16, 185, 129, 0.5);
     }
     .status-wip {
         background: rgba(99, 102, 241, 0.25);
-        color: #a5b4fc;
+        color: #6366f1;
         border: 1px solid rgba(99, 102, 241, 0.5);
     }
 
-    /* Tag Chips */
+    /* Word-Tag Chips - Always Crisp & Legible */
     .tag-chip {
         display: inline-flex;
         align-items: center;
         background: #1e293b;
+        color: #ffffff !important;
         border: 1px solid #475569;
         border-radius: 8px;
-        padding: 5px 10px;
+        padding: 5px 12px;
         margin: 4px;
         font-size: 14px;
-        color: #f8fafc;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    }
+    .tag-chip strong {
+        color: #ffffff !important;
     }
     .tag-label {
         margin-left: 8px;
@@ -139,27 +85,12 @@ st.markdown(
         font-size: 11px;
         font-weight: 800;
         letter-spacing: 0.5px;
+        color: #ffffff !important;
     }
-    .tier-trigram { background: #2563eb; color: #ffffff; }
-    .tier-bigram { background: #7c3aed; color: #ffffff; }
-    .tier-unigram { background: #059669; color: #ffffff; }
-    .tier-default { background: #d97706; color: #ffffff; }
-
-    /* Calculation Cards */
-    .calc-card {
-        background: #0f172a;
-        border: 1px solid #334155;
-        border-left: 4px solid #6366f1;
-        border-radius: 8px;
-        padding: 14px 16px;
-        margin-bottom: 14px;
-    }
-    .calc-card h5 {
-        color: #38bdf8;
-        margin-top: 0;
-        margin-bottom: 6px;
-        font-weight: 700;
-    }
+    .tier-trigram { background: #2563eb !important; color: #ffffff !important; }
+    .tier-bigram { background: #7c3aed !important; color: #ffffff !important; }
+    .tier-unigram { background: #059669 !important; color: #ffffff !important; }
+    .tier-default { background: #d97706 !important; color: #ffffff !important; }
     </style>
     """,
     unsafe_allow_html=True,
@@ -426,163 +357,87 @@ elif navigation_choice == "🔍 Algorithm & Backoff Trace":
     )
 
     # 1. High-Contrast Readable Hierarchy Table
-    st.markdown(
-        """
-        <div class="metric-card">
-            <h4>Hierarchy of N-gram Context & Decision Rules</h4>
-            <p>When tagging a token <code>w_i</code>, the model searches from most specific (Trigram) to most general (Default):</p>
-            <table class="ngram-table">
-                <thead>
-                    <tr>
-                        <th style="width: 15%;">Model Tier</th>
-                        <th style="width: 25%;">Conditioning Context</th>
-                        <th style="width: 30%;">Mathematical Decision Rule</th>
-                        <th style="width: 30%;">When Does It Win?</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td><span class="tag-label tier-trigram">Trigram</span></td>
-                        <td><code>(t_{i-2}, t_{i-1}, w_i)</code></td>
-                        <td><code>argmax_t P(t | t_{i-2}, t_{i-1}, w_i)</code></td>
-                        <td>Matches full 3-gram syntactic structure (e.g. relative clause syntax).</td>
-                    </tr>
-                    <tr>
-                        <td><span class="tag-label tier-bigram">Bigram</span></td>
-                        <td><code>(t_{i-1}, w_i)</code></td>
-                        <td><code>argmax_t P(t | t_{i-1}, w_i)</code></td>
-                        <td>Trigram misses, but previous tag provides context to resolve word ambiguity.</td>
-                    </tr>
-                    <tr>
-                        <td><span class="tag-label tier-unigram">Unigram</span></td>
-                        <td><code>(w_i)</code></td>
-                        <td><code>argmax_t P(t | w_i)</code></td>
-                        <td>Word was seen in corpus; picks its most frequent tag regardless of context.</td>
-                    </tr>
-                    <tr>
-                        <td><span class="tag-label tier-default">Default</span></td>
-                        <td><code>None</code></td>
-                        <td><code>"NN" (Noun)</code></td>
-                        <td>Word is Out-Of-Vocabulary (OOV) or spontaneous conversational filler.</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
+
+    # 1. High-Contrast Readable Hierarchy Table
+    with st.container(border=True):
+        st.markdown("### 🏛️ Hierarchy of N-gram Context & Decision Rules")
+        st.markdown("When tagging a token $w_i$, the model searches sequentially from most specific (**Trigram**) to most general (**Default**):")
+        
+        st.markdown(
+            """
+| Model Tier | Conditioning Context | Mathematical Decision Rule | When Does It Win? |
+| :--- | :--- | :--- | :--- |
+| :blue-background[**Trigram**] | `(t_{i-2}, t_{i-1}, w_i)` | $\\arg\\max_t P(t \\mid t_{i-2}, t_{i-1}, w_i)$ | Matches full 3-gram syntactic structure (e.g. relative clause syntax). |
+| :purple-background[**Bigram**] | `(t_{i-1}, w_i)` | $\\arg\\max_t P(t \\mid t_{i-1}, w_i)$ | Trigram misses, but previous tag provides context to resolve word ambiguity. |
+| :green-background[**Unigram**] | `(w_i)` | $\\arg\\max_t P(t \\mid w_i)$ | Word was seen in corpus; picks its most frequent tag regardless of context. |
+| :orange-background[**Default**] | `None` | `"NN" (Noun)` | Word is Out-Of-Vocabulary (OOV) or spontaneous conversational filler. |
+            """
+        )
+
+    st.markdown("---")
 
     # 2. Section: 4 Clear Mathematical Calculation Examples
     st.subheader("📐 4 Concrete Mathematical Calculation Examples (Penn Treebank)")
-    st.markdown("Here is exactly how empirical probability distributions and backoff decisions are calculated:")
+    st.markdown("Here is exactly how empirical probability distributions and backoff decisions are calculated with real corpus numbers:")
 
-    c1, c2 = st.columns(2)
+    c1, c2 = st.columns(2, gap="medium")
 
     with c1:
-        st.markdown(
-            """
-            <div class="calc-card">
-                <h5>1. Default Tagger Calculation: Out-of-Vocabulary (OOV)</h5>
-                <p><strong>Example Token:</strong> <code>"Yeah"</code> (Conversational filler)</p>
-                <p><strong>Corpus Frequency:</strong> <code>Count("Yeah") = 0</code> in Penn Treebank.</p>
-                <p><strong>Probability Calculation:</strong></p>
-            """,
-            unsafe_allow_html=True,
-        )
-        st.latex(r"P(Tag \mid \text{'Yeah'}) = \frac{C(\text{'Yeah'}, Tag)}{C(\text{'Yeah'})} = \frac{0}{0} \implies \text{Undefined}")
-        st.markdown(
-            """
-                <p><strong>Backoff Journey:</strong></p>
-                <ul>
-                    <li>Trigram: ❌ Miss (word not in context)</li>
-                    <li>Bigram: ❌ Miss (word not in context)</li>
-                    <li>Unigram: ❌ Miss (word not in vocabulary)</li>
-                    <li><strong>Default Fallback:</strong> ➔ <code>'NN'</code> (Noun)</li>
-                </ul>
-                <p style="color: #94a3b8; font-size: 13px;"><em>Why 'NN'? In English open-class vocabulary, nouns are the largest category (~35% of all vocabulary words). Assigning 'NN' minimizes risk for unseen words.</em></p>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
+        with st.container(border=True):
+            st.markdown("#### 1️⃣ Default Tagger: Out-of-Vocabulary (OOV)")
+            st.markdown("**Example Token:** :orange-background[**Yeah**] *(Conversational filler)*")
+            st.markdown("**Corpus Frequency:** :gray-background[Count('Yeah') = 0] in Penn Treebank.")
+            st.markdown("**Empirical Probability Calculation:**")
+            st.latex(r"P(Tag \mid \text{'Yeah'}) = \frac{C(\text{'Yeah'}, Tag)}{C(\text{'Yeah'})} = \frac{0}{0} \implies \text{Undefined}")
+            st.markdown("<mark>**Backoff Search Journey:**</mark>", unsafe_allow_html=True)
+            st.markdown("<mark>- ❌ **Trigram**: Miss *(word not in context)*</mark>", unsafe_allow_html=True)
+            st.markdown("<mark>- ❌ **Bigram**: Miss *(word not in context)*</mark>", unsafe_allow_html=True)
+            st.markdown("<mark>- ❌ **Unigram**: Miss *(word not in corpus vocabulary)*</mark>", unsafe_allow_html=True)
+            st.markdown("<mark>- 🎯 **Default Fallback**: ➔ :orange-background[**NN**] *(Noun)*</mark>", unsafe_allow_html=True)
+            st.markdown(
+                """<div style="background:#1e3a5f;border-left:4px solid #3b82f6;padding:10px 14px;border-radius:6px;color:#e2e8f0;margin-top:6px;">
+                💡 <b>Why 'NN'?</b> In English open-class vocabulary, nouns are the largest category
+                (~35% of all vocabulary words). Assigning 'NN' minimizes risk for unseen words.
+                </div>""",
+                unsafe_allow_html=True,
+            )
 
-        st.markdown(
-            """
-            <div class="calc-card">
-                <h5>3. Bigram Context Disambiguation Calculation</h5>
-                <p><strong>Example Token:</strong> <code>"right"</code> preceded by Comma tag <code>','</code></p>
-                <p><strong>Corpus Challenge:</strong> <code>"right"</code> is ambiguous: it appears 22 times as Noun (<code>NN</code>), 7 times as Adverb (<code>RB</code>), and 5 times as Adjective (<code>JJ</code>).</p>
-                <p><strong>Context Conditioning:</strong></p>
-            """,
-            unsafe_allow_html=True,
-        )
-        st.latex(r"P(Tag \mid t_{i-1}=\text{','}, w_i=\text{'right'}) = \frac{C(t_{i-1}=\text{','}, w_i=\text{'right'}, Tag)}{C(t_{i-1}=\text{','}, w_i=\text{'right'})}")
-        st.markdown(
-            """
-                <p><strong>Bigram Decision:</strong></p>
-                <ul>
-                    <li>In isolation (Unigram): <code>"right"</code> would be tagged <code>NN</code> (64.7%).</li>
-                    <li><strong>With Bigram Context:</strong> Following <code>','</code>, it matches adverbial discourse ➔ <code>'RB'</code> (Adverb: <em>"right before lunch"</em>)!</li>
-                </ul>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
+        with st.container(border=True):
+            st.markdown("<mark>#### 3️⃣ Bigram Context Disambiguation Calculation</mark>", unsafe_allow_html=True)
+            st.markdown("<mark>**Example Token:** :purple-background[**right**] preceded by Comma tag :gray-background[**,**]</mark>", unsafe_allow_html=True)
+            st.markdown("**Corpus Challenge:** `'right'` is ambiguous: appears 22 times as Noun (`NN`), 7 times as Adverb (`RB`), and 5 times as Adjective (`JJ`).")
+            st.markdown("<mark>**Context Conditioning Formula:**</mark>", unsafe_allow_html=True)
+            st.latex(r"P(Tag \mid t_{i-1}=\text{','}, w_i=\text{'right'}) = \frac{C(t_{i-1}=\text{','}, w_i=\text{'right'}, Tag)}{C(t_{i-1}=\text{','}, w_i=\text{'right'})}")
+            st.markdown("**Bigram Context Resolution:**")
+            st.markdown("- **In isolation (Unigram)**: `'right'` would guess `NN` (64.71%).")
+            st.markdown("- **With Bigram Context**: Preceded by `','`, the transition matches adverbial discourse ➔ :purple-background[**RB**] *(Adverb: 'like, right before lunch')*!")
+            st.success("✅ **Bigram Context Overrides Unigram**: Correctly assigns :purple-background[**RB**] based on the preceding comma!")
 
     with c2:
-        st.markdown(
-            """
-            <div class="calc-card">
-                <h5>2. Unigram Maximum-Likelihood Probability Calculation</h5>
-                <p><strong>Example Token:</strong> <code>"told"</code> (Verb)</p>
-                <p><strong>Corpus Frequency:</strong> <code>Count("told") = 11</code> in training split.</p>
-                <p><strong>Tag Frequency Breakdown:</strong></p>
-                <ul>
-                    <li><code>Count("told", VBD) = 9</code> (Past tense verb)</li>
-                    <li><code>Count("told", VBN) = 2</code> (Past participle)</li>
-                </ul>
-                <p><strong>Empirical Probability:</strong></p>
-            """,
-            unsafe_allow_html=True,
-        )
-        st.latex(r"P(\text{VBD} \mid \text{'told'}) = \frac{9}{11} \approx 81.82\%")
-        st.latex(r"P(\text{VBN} \mid \text{'told'}) = \frac{2}{11} \approx 18.18\%")
-        st.markdown(
-            """
-                <p><strong>Decision Rule:</strong></p>
-            """,
-            unsafe_allow_html=True,
-        )
-        st.latex(r"\hat{t} = \arg\max_{t \in \{\text{VBD}, \text{VBN}\}} P(t \mid \text{'told'}) = \text{\textbf{VBD}}")
-        st.markdown(
-            """
-                <p style="color: #94a3b8; font-size: 13px;"><em>The Unigram model picks VBD because 81.8% &gt; 18.2%.</em></p>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
+        with st.container(border=True):
+            st.markdown("#### 2️⃣ Unigram Maximum-Likelihood Calculation")
+            st.markdown("**Example Token:** :green-background[**told**] *(Verb)*")
+            st.markdown("**Corpus Frequency:** :gray-background[Count('told') = 11] in training split.")
+            st.markdown("**Tag Frequency Breakdown in Penn Treebank:**")
+            st.markdown("- :gray-background[Count('told', VBD) = 9] *(Past tense verb)*")
+            st.markdown("- :gray-background[Count('told', VBN) = 2] *(Past participle)*")
+            st.markdown("**Empirical Probability Calculation:**")
+            st.latex(r"P(\text{VBD} \mid \text{'told'}) = \frac{9}{11} \approx 81.82\%")
+            st.latex(r"P(\text{VBN} \mid \text{'told'}) = \frac{2}{11} \approx 18.18\%")
+            st.markdown("**Decision Rule (Argmax):**")
+            st.latex(r"\hat{t} = \arg\max_{t \in \{\text{VBD}, \text{VBN}\}} P(t \mid \text{'told'}) = \text{\textbf{VBD}}")
+            st.success("✅ **Unigram Decision**: Selects :green-background[**VBD**] because **81.82% > 18.18%**.")
 
-        st.markdown(
-            """
-            <div class="calc-card">
-                <h5>4. Trigram 3-Gram Syntactic Structure Calculation</h5>
-                <p><strong>Example Token:</strong> <code>"that"</code> preceded by Noun and Comma <code>('NN', ',')</code></p>
-                <p><strong>Corpus Challenge:</strong> <code>"that"</code> appears 411 times as Preposition/Conjunction (<code>IN</code>) and 170 times as Wh-Determiner (<code>WDT</code>).</p>
-                <p><strong>Trigram Conditioning:</strong></p>
-            """,
-            unsafe_allow_html=True,
-        )
-        st.latex(r"P(Tag \mid t_{i-2}=\text{NN}, t_{i-1}=\text{','}, w_i=\text{'that'})")
-        st.markdown(
-            """
-                <p><strong>Trigram Decision:</strong></p>
-                <ul>
-                    <li>Pure Unigram would incorrectly guess <code>IN</code> (63.1%).</li>
-                    <li><strong>Trigram 3-Gram syntax:</strong> Recognizes non-restrictive relative clause syntax (<em>"lunch, that was..."</em>) ➔ Overrides to <code>'WDT'</code>!</li>
-                </ul>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
+        with st.container(border=True):
+            st.markdown("#### 4️⃣ Trigram 3-Gram Syntactic Structure Calculation")
+            st.markdown("**Example Token:** :blue-background[**that**] preceded by Noun and Comma :gray-background[**('NN', ',')**]")
+            st.markdown("**Corpus Challenge:** `'that'` appears 411 times as Preposition/Conjunction (`IN`) and 170 times as Wh-Determiner (`WDT`).")
+            st.markdown("**Trigram Conditioning Formula:**")
+            st.latex(r"P(Tag \mid t_{i-2}=\text{NN}, t_{i-1}=\text{','}, w_i=\text{'that'})")
+            st.markdown("**Trigram 3-Gram Resolution:**")
+            st.markdown("- **In isolation (Unigram)**: Guesses `IN` (63.13%).")
+            st.markdown("- **With Trigram Context**: Following `('NN', ',')`, it detects non-restrictive relative clause syntax ➔ Overrides to :blue-background[**WDT**] *(Wh-determiner / relative pronoun)*!")
+            st.success("✅ **Trigram 3-Gram Overrides Prior**: Identifies relative clause syntax and assigns :blue-background[**WDT**]!")
 
     st.markdown("---")
 
